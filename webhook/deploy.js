@@ -16,8 +16,12 @@ const commands = [
 fs.appendFileSync(debugLogFile, 'Running deployment commands...\n', 'utf8');
 fs.appendFileSync(debugLogFile, `Commands: ${commands.join(' && ')}\n`, 'utf8');
 
-commands.forEach(command => {
+function executeCommand(index) {
+  if (index >= commands.length) return;
+
+  const command = commands[index];
   fs.appendFileSync(debugLogFile, `Running command: ${command}\n`, 'utf8');
+
   exec(command, (error, stdout, stderr) => {
     if (error) {
       fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
@@ -27,5 +31,11 @@ commands.forEach(command => {
     if (stderr) {
       fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
     }
+
+    // Execute the next command
+    executeCommand(index + 1);
   });
-});
+}
+
+// Start executing commands from the first one
+executeCommand(0);
