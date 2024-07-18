@@ -23,4 +23,11 @@ commands.forEach(({ cmd, cwd }) => {
       return;
     }
     if (stderr) {
-      fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, '
+      fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
+      return;
+    }
+    fs.appendFileSync(logFile, `Stdout: ${stdout}\n`, 'utf8');
+  });
+});
+
+fs.appendFileSync(debugLogFile, 'Deploy script completed.\n', 'utf8');
