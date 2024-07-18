@@ -2,43 +2,59 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const logDir = path.resolve(__dirname, '../logs/webhook');
+// Define log paths
+const logDir = path.join(__dirname, '..', 'logs', 'webhook');
 const outputLog = path.join(logDir, 'exec_output_log.txt');
 const errorLog = path.join(logDir, 'exec_error_log.txt');
 const debugLog = path.join(logDir, 'deploy_debug_log.txt');
 
 // Ensure log directory exists
 if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
+  fs.mkdirSync(logDir, { recursive: true });
 }
 
-// Initialize log files
-fs.writeFileSync(outputLog, '');
-fs.writeFileSync(errorLog, '');
-fs.writeFileSync(debugLog, '');
+// Log function
+const log = (message, logPath) => {
+  fs.appendFileSync(logPath, message + '\n');
+};
 
-// Define the commands to run
+// Execute command
+const executeCommand = (command, logPath) => {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        log(`Error: ${error.message}`, logPath);
+        reject(error);
+      }
+      if (stderr) {
+        log(`Stderr: ${stderr}`, logPath);
+        reject(stderr);
+      }
+      log(`Stdout: ${stdout}`, logPath);
+      resolve(stdout);
+    });
+  });
+};
+
+// Deployment commands
 const commands = [
-    'git config --global --add safe.directory D:/Projects',
-    'git pull origin main',
-    'npm install --prefix D:/Projects/webhook',
-    'pm2 reload D:/Projects/ecosystem.config.js --env production'
+  'git config --global --add safe.directory D:/Projects',
+  'git pull origin main',
+  'npm install --prefix D:/Projects/webhook'
 ];
 
-// Function to run a command
-function runCommand(command, callback) {
-    exec(command, { shell: true }, (error, stdout, stderr) => {
-        if (error) {
-            fs.appendFileSync(errorLog, `Error: ${error}\nStderr: ${stderr}\n`);
-            callback(error);
-        } else {
-            fs.appendFileSync(outputLog, `Stdout: ${stdout}\n`);
-            callback();
-        }
-    });
-}
-
-// Function to run all commands in sequence
-function runCommandsSequentially(commands, index = 0) {
-    if (index >= commands.length) {
-  
+// Run deployment
+(async () => {
+  log('Running deployment commands...', debugLog);
+  for (const command of commands) {
+    log(`Running command: ${command}`, debugLog);
+    try {
+      await executeCommand(command, debugLog);
+      log(`Command succeeded: ${command}`, debugLog);
+    } catch (error) {
+      log(`Command failed: ${command}`, debugLog);
+      log(error, errorLog);
+      break;
+    }
+  }
+})();
