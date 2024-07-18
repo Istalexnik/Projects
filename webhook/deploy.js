@@ -24,12 +24,12 @@ function executeCommand(index) {
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
-      //fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
+      fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
       return;
     }
-   // fs.appendFileSync(outputLogFile, `Stdout: ${stdout}\n`, 'utf8');
+    fs.appendFileSync(outputLogFile, `Stdout: ${stdout}\n`, 'utf8');
     if (stderr) {
-  //    fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
+      fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
     }
 
     // Execute the next command
