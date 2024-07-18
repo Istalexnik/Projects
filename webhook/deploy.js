@@ -13,7 +13,11 @@ const commands = [
   'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
 ];
 
+fs.appendFileSync(debugLogFile, 'Running deployment commands...\n', 'utf8');
+fs.appendFileSync(debugLogFile, `Commands: ${commands.join(' && ')}\n`, 'utf8');
+
 commands.forEach(command => {
+  fs.appendFileSync(debugLogFile, `Running command: ${command}\n`, 'utf8');
   exec(command, (error, stdout, stderr) => {
     if (error) {
       fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
