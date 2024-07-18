@@ -9,7 +9,7 @@ const commands = [
   { cmd: 'git config --global --add safe.directory D:/Projects', cwd: 'D:\\Projects' },
   { cmd: 'git pull origin main', cwd: 'D:\\Projects\\a\\source' },
   { cmd: 'npm install', cwd: 'D:\\Projects\\a\\source' },
-  { cmd: 'pm2 reload D:\\Projects\\a\\source\\ecosystem.config.js --env production', cwd: 'D:\\Projects\\a' }
+  { cmd: 'pm2 reload D:\\Projects\\a\\source\\ecosystem.config.js --env production', cwd: 'D:\\Projects' }
 ];
 
 fs.appendFileSync(debugLogFile, 'Running deployment commands...\n', 'utf8');
@@ -23,7 +23,7 @@ function runCommand(commandIndex) {
   const { cmd, cwd } = commands[commandIndex];
   fs.appendFileSync(debugLogFile, `Running command: ${cmd} in ${cwd}\n`, 'utf8');
 
-  exec(cmd, { cwd }, (error, stdout, stderr) => {
+  exec(cmd, { cwd, shell: true }, (error, stdout, stderr) => {
     if (error) {
       fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
       fs.appendFileSync(debugLogFile, `Command failed: ${cmd}\nError: ${error}\n`, 'utf8');
