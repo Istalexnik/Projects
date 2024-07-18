@@ -1,45 +1,40 @@
-const fs = require('fs');
 const { exec } = require('child_process');
-
-const errorLogFile = 'D:\\Projects\\logs\\webhook\\exec_error_log.txt';
-const outputLogFile = 'D:\\Projects\\logs\\webhook\\exec_output_log.txt';
-const debugLogFile = 'D:\\Projects\\logs\\webhook\\deploy_debug_log.txt';
+const fs = require('fs');
 
 const commands = [
-  { cmd: 'git config --global --add safe.directory D:/Projects', cwd: 'D:\\Projects' },
-  { cmd: 'git pull origin main', cwd: 'D:\\Projects\\webhook' },
-  { cmd: 'npm install', cwd: 'D:\\Projects\\webhook' },
-  { cmd: 'pm2 reload D:\\Projects\\ecosystem.config.js --env production', cwd: 'D:\\Projects' }
+    'git config --global --add safe.directory D:/Projects',
+    'git pull origin main',
+    'npm install',
+    'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
 ];
 
-fs.appendFileSync(debugLogFile, 'Running deployment commands...\n', 'utf8');
-fs.appendFileSync(debugLogFile, `Commands: ${commands.map(c => c.cmd).join(' && ')}\n`, 'utf8');
-
-function runCommand(commandIndex) {
-  if (commandIndex >= commands.length) {
-    return;
-  }
-
-  const { cmd, cwd } = commands[commandIndex];
-  fs.appendFileSync(debugLogFile, `Running command: ${cmd}\n`, 'utf8');
-
-  exec(cmd, { cwd, shell: true }, (error, stdout, stderr) => {
-    if (error) {
-      fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
-      fs.appendFileSync(debugLogFile, `Command failed: ${cmd}\nError: ${error}\n`, 'utf8');
-      return;
+const executeCommands = async () => {
+    for (const command of commands) {
+        try {
+            await new Promise((resolve, reject) => {
+                exec(command, { cwd: 'D:\\Projects' }, (error, stdout, stderr) => {
+                    if (error) {
+                        fs.appendFileSync('D:\\Projects\\logs\\webhook\\exec_error_log.txt', `Error: ${error.message}\n`);
+                        fs.appendFileSync('D:\\Projects\\logs\\webhook\\exec_error_log.txt', `Stderr: ${stderr}\n`);
+                        reject(error);
+                        return;
+                    }
+                    fs.appendFileSync('D:\\Projects\\logs\\webhook\\exec_output_log.txt', `Stdout: ${stdout}\n`);
+                    resolve();
+                });
+            });
+        } catch (error) {
+            console.error(`Failed to execute command: ${command}`, error);
+            throw error;
+        }
     }
+};
 
-    fs.appendFileSync(outputLogFile, `Stdout: ${stdout}\n`, 'utf8');
-    fs.appendFileSync(debugLogFile, `Command succeeded: ${cmd}\nStdout: ${stdout}\n`, 'utf8');
-
-    if (stderr) {
-      fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
-      fs.appendFileSync(debugLogFile, `Stderr: ${stderr}\n`, 'utf8');
+(async () => {
+    try {
+        await executeCommands();
+        console.log('Deployment successful');
+    } catch (error) {
+        console.error('Deployment failed', error);
     }
-
-    runCommand(commandIndex + 1);
-  });
-}
-
-runCommand(0);
+})();
