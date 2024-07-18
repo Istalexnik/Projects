@@ -1,4 +1,11 @@
 {
+  "name": "webhook",
+  "version": "1.0.0",
+  "description": "Webhook listener",
+  "main": "webhook.js",
+  "scripts": {
+    "start": "node webhook.js"
+  },
   "dependencies": {
     "body-parser": "^1.20.2",
     "express": "^4.19.2"

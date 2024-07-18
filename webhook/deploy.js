@@ -41,23 +41,4 @@ function runCommand(command, callback) {
 // Function to run all commands in sequence
 function runCommandsSequentially(commands, index = 0) {
     if (index >= commands.length) {
-        fs.appendFileSync(debugLog, 'Deployment completed successfully.\n');
-        return;
-    }
-
-    const command = commands[index];
-    fs.appendFileSync(debugLog, `Running command: ${command}\n`);
-
-    runCommand(command, (error) => {
-        if (error) {
-            fs.appendFileSync(debugLog, `Command failed: ${command}\n`);
-        } else {
-            fs.appendFileSync(debugLog, `Command succeeded: ${command}\n`);
-            runCommandsSequentially(commands, index + 1);
-        }
-    });
-}
-
-// Start the deployment process
-fs.appendFileSync(debugLog, 'Running deployment commands...\n');
-runCommandsSequentially(commands);
+  
