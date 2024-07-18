@@ -23,15 +23,21 @@ app.post('/webhook', (req, res) => {
   fs.writeFileSync(path.join(logDir, 'webhook_log.txt'), JSON.stringify(req.body, null, 2));
 
   if (req.body.ref === 'refs/heads/main') {
+    console.log('Executing deploy script...');
+    fs.appendFileSync(path.join(logDir, 'exec_debug_log.txt'), 'Starting deploy script...\n');
+
     exec(`node ${deployScriptPath}`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
+        fs.appendFileSync(path.join(logDir, 'exec_debug_log.txt'), `exec error: ${err}\n`);
         fs.writeFileSync(path.join(logDir, 'exec_error_log.txt'), `Error: ${err}\nStdout: ${stdout}\nStderr: ${stderr}`);
         return res.status(500).send('Deployment failed');
       }
       console.log(`stdout: ${stdout}`);
+      fs.appendFileSync(path.join(logDir, 'exec_debug_log.txt'), `stdout: ${stdout}\n`);
       fs.writeFileSync(path.join(logDir, 'exec_output_log.txt'), `Stdout: ${stdout}\nStderr: ${stderr}`);
       console.error(`stderr: ${stderr}`);
+      fs.appendFileSync(path.join(logDir, 'exec_debug_log.txt'), `stderr: ${stderr}\n`);
       res.status(200).send('Deployment successful');
     });
   } else {
