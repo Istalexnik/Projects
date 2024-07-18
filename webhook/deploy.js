@@ -18,7 +18,7 @@ fs.appendFileSync(debugLogFile, 'Starting deploy script...\n', 'utf8');
 
 commands.forEach((command) => {
   fs.appendFileSync(deployDebugLogFile, `Running command: ${command}\n`, 'utf8');
-  exec(command, (error, stdout, stderr) => {
+  exec(command, { cwd: 'D:\\Projects\\webhook' }, (error, stdout, stderr) => {
     if (error) {
       fs.appendFileSync(errorLogFile, `Error: ${error.message}\n`, 'utf8');
       return;
