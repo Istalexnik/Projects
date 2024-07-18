@@ -1,6 +1,0 @@
-Stdout: 
-Stderr: exec error: Error: Command failed: git config --global --add safe.directory D:/Projects && cd D:\Projects\webhook && git pull origin main && npm install && pm2 reload ecosystem.config.js  --env production
-From github.com:Istalexnik/Projects
- * branch            main       -> FETCH_HEAD
-[PM2][ERROR] File ecosystem.config.js not found
-
