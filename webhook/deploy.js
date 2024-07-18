@@ -1,29 +1,39 @@
 const { exec } = require('child_process');
 const fs = require('fs');
+const path = require('path');
 
-const logFile = 'D:\\Projects\\logs\\webhook\\exec_output_log.txt';
-const errorLogFile = 'D:\\Projects\\logs\\webhook\\exec_error_log.txt';
-const debugLogFile = 'D:\\Projects\\logs\\webhook\\exec_debug_log.txt';
-const deployDebugLogFile = 'D:\\Projects\\logs\\webhook\\deploy_debug_log.txt';
+const logDir = path.join(__dirname, '..', 'logs', 'webhook');
+const errorLogFile = path.join(logDir, 'exec_error_log.txt');
+const outputLogFile = path.join(logDir, 'exec_output_log.txt');
+const debugLogFile = path.join(logDir, 'deploy_debug_log.txt');
+
+function logDebug(message) {
+  fs.appendFileSync(debugLogFile, `${message}\n`, 'utf8');
+}
+
+logDebug('Running deployment commands...');
 
 const commands = [
-  { cmd: 'git config --global --add safe.directory D:/Projects', cwd: 'D:\\Projects' },
-  { cmd: 'git pull origin main', cwd: 'D:\\Projects\\webhook' },
-  { cmd: 'npm install', cwd: 'D:\\Projects\\webhook' },
-  { cmd: 'pm2 reload D:\\Projects\\ecosystem.config.js --env production', cwd: 'D:\\Projects' }
+  'git config --global --add safe.directory D:/Projects',
+  'cd D:\\Projects\\webhook',
+  'git pull origin main',
+  'npm install',
+  'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
 ];
 
-fs.appendFileSync(debugLogFile, 'Starting deploy script...\n', 'utf8');
+logDebug(`Commands: ${commands.join(' && ')}`);
 
-commands.forEach(({ cmd, cwd }) => {
-  fs.appendFileSync(deployDebugLogFile, `Running command: ${cmd} in ${cwd}\n`, 'utf8');
-  exec(cmd, { cwd }, (error, stdout, stderr) => {
+commands.forEach((cmd, index) => {
+  logDebug(`Running command: ${cmd} in ${index > 0 ? 'D:\\Projects\\webhook' : 'D:\\Projects'}`);
+  exec(cmd, { cwd: index > 0 ? 'D:\\Projects\\webhook' : 'D:\\Projects' }, (error, stdout, stderr) => {
     if (error) {
-      fs.appendFileSync(errorLogFile, `Error: ${error.message}\n`, 'utf8');
-      return;
+      fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
     }
     if (stderr) {
       fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
-      return;
     }
-   
+    if (stdout) {
+      fs.appendFileSync(outputLogFile, `Stdout: ${stdout}\n`, 'utf8');
+    }
+  });
+});
