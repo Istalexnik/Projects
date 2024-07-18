@@ -1,17 +1,16 @@
 const { exec } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
-const logFile = path.join('D:', 'Projects', 'logs', 'webhook', 'exec_output_log.txt');
-const errorLogFile = path.join('D:', 'Projects', 'logs', 'webhook', 'exec_error_log.txt');
-const debugLogFile = path.join('D:', 'Projects', 'logs', 'webhook', 'exec_debug_log.txt');
-const deployDebugLogFile = path.join('D:', 'Projects', 'logs', 'webhook', 'deploy_debug_log.txt');
+const logFile = 'D:\\Projects\\logs\\webhook\\exec_output_log.txt';
+const errorLogFile = 'D:\\Projects\\logs\\webhook\\exec_error_log.txt';
+const debugLogFile = 'D:\\Projects\\logs\\webhook\\exec_debug_log.txt';
+const deployDebugLogFile = 'D:\\Projects\\logs\\webhook\\deploy_debug_log.txt';
 
 const commands = [
   'git config --global --add safe.directory D:/Projects',
   'git pull origin main',
   'npm install',
-  'pm2 reload D:/Projects/ecosystem.config.js --env production'
+  'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
 ];
 
 fs.appendFileSync(debugLogFile, 'Starting deploy script...\n', 'utf8');
@@ -31,4 +30,4 @@ commands.forEach((command) => {
   });
 });
 
-fs.appendFileSync(debugLogFile, 'Deploy script completed.\n', 'utf8');
+fs
