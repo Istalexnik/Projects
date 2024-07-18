@@ -1,39 +1,34 @@
 const { exec } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
-const projectDir = 'D:\\Projects\\webhook';
-const ecosystemConfigPath = 'D:\\Projects\\ecosystem.config.js';
-const logDir = 'D:\\Projects\\logs\\webhook';
-const debugLogPath = path.join(logDir, 'deploy_debug_log.txt');
-const outputLogPath = path.join(logDir, 'exec_output_log.txt');
-const errorLogPath = path.join(logDir, 'exec_error_log.txt');
-
-// Ensure log directory exists
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir, { recursive: true });
-}
+const logFile = 'D:\\Projects\\logs\\webhook\\exec_output_log.txt';
+const errorLogFile = 'D:\\Projects\\logs\\webhook\\exec_error_log.txt';
+const debugLogFile = 'D:\\Projects\\logs\\webhook\\exec_debug_log.txt';
+const deployDebugLogFile = 'D:\\Projects\\logs\\webhook\\deploy_debug_log.txt';
 
 const commands = [
-    `git config --global --add safe.directory D:/Projects`,
-    `cd ${projectDir}`,
-    `git pull origin main`,
-    'npm install',
-    `pm2 reload ${ecosystemConfigPath} --env production`
+  'git config --global --add safe.directory D:/Projects',
+  'cd D:\\Projects\\webhook',
+  'git pull origin main',
+  'npm install',
+  'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
 ];
 
-fs.appendFileSync(debugLogPath, `Running deployment commands...\nCommands: ${commands.join(' && ')}\n`);
+fs.appendFileSync(debugLogFile, 'Starting deploy script...\n', 'utf8');
 
-exec(commands.join(' && '), (err, stdout, stderr) => {
-    if (err) {
-        console.error(`exec error: ${err}`);
-        fs.appendFileSync(debugLogPath, `exec error: ${err}\nStderr: ${stderr}\n`);
-        fs.writeFileSync(errorLogPath, `Error: ${err}\nStdout: ${stdout}\nStderr: ${stderr}`);
-        return;
+commands.forEach((command) => {
+  fs.appendFileSync(deployDebugLogFile, `Running command: ${command}\n`, 'utf8');
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      fs.appendFileSync(errorLogFile, `Error: ${error.message}\n`, 'utf8');
+      return;
     }
-    console.log(`stdout: ${stdout}`);
-    fs.appendFileSync(debugLogPath, `stdout: ${stdout}\n`);
-    fs.writeFileSync(outputLogPath, `Stdout: ${stdout}\nStderr: ${stderr}`);
-    console.error(`stderr: ${stderr}`);
-    fs.appendFileSync(debugLogPath, `stderr: ${stderr}\n`);
+    if (stderr) {
+      fs.appendFileSync(errorLogFile, `Stderr: ${stderr}\n`, 'utf8');
+      return;
+    }
+    fs.appendFileSync(logFile, `Stdout: ${stdout}\n`, 'utf8');
+  });
 });
+
+fs.appendFileSync(debugLogFile, 'Deploy script completed.\n', 'utf8');
