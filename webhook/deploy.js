@@ -12,6 +12,11 @@ if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
 }
 
+// Initialize log files
+fs.writeFileSync(outputLog, '');
+fs.writeFileSync(errorLog, '');
+fs.writeFileSync(debugLog, '');
+
 // Define the commands to run
 const commands = [
     'git config --global --add safe.directory D:/Projects',
