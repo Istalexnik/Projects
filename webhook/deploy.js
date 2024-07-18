@@ -22,7 +22,7 @@ fs.appendFileSync(debugLogPath, `Running deployment commands...\nCommands: ${com
 exec(commands.join(' && '), (err, stdout, stderr) => {
   if (err) {
     console.error(`exec error: ${err}`);
-    fs.appendFileSync(debugLogPath, `exec error: ${err}\n`);
+    fs.appendFileSync(debugLogPath, `exec error: ${err}\nStderr: ${stderr}\n`);
     fs.writeFileSync(path.join(logDir, 'exec_error_log.txt'), `Error: ${err}\nStdout: ${stdout}\nStderr: ${stderr}`);
     return;
   }
