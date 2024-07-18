@@ -2,6 +2,16 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const logDir = path.resolve(__dirname, '../logs/webhook');
+const outputLog = path.join(logDir, 'exec_output_log.txt');
+const errorLog = path.join(logDir, 'exec_error_log.txt');
+const debugLog = path.join(logDir, 'deploy_debug_log.txt');
+
+// Ensure log directory exists
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+}
+
 // Define the commands to run
 const commands = [
     'git config --global --add safe.directory D:/Projects',
@@ -12,12 +22,12 @@ const commands = [
 
 // Function to run a command
 function runCommand(command, callback) {
-    exec(command, { cwd: 'D:/Projects/webhook', shell: true }, (error, stdout, stderr) => {
+    exec(command, { shell: true }, (error, stdout, stderr) => {
         if (error) {
-            fs.appendFileSync('D:/Projects/logs/webhook/exec_error_log.txt', `Error: ${error}\nStderr: ${stderr}\n`);
+            fs.appendFileSync(errorLog, `Error: ${error}\nStderr: ${stderr}\n`);
             callback(error);
         } else {
-            fs.appendFileSync('D:/Projects/logs/webhook/exec_output_log.txt', `Stdout: ${stdout}\n`);
+            fs.appendFileSync(outputLog, `Stdout: ${stdout}\n`);
             callback();
         }
     });
@@ -26,23 +36,23 @@ function runCommand(command, callback) {
 // Function to run all commands in sequence
 function runCommandsSequentially(commands, index = 0) {
     if (index >= commands.length) {
-        fs.appendFileSync('D:/Projects/logs/webhook/deploy_debug_log.txt', 'Deployment completed successfully.\n');
+        fs.appendFileSync(debugLog, 'Deployment completed successfully.\n');
         return;
     }
 
     const command = commands[index];
-    fs.appendFileSync('D:/Projects/logs/webhook/deploy_debug_log.txt', `Running command: ${command}\n`);
+    fs.appendFileSync(debugLog, `Running command: ${command}\n`);
 
     runCommand(command, (error) => {
         if (error) {
-            fs.appendFileSync('D:/Projects/logs/webhook/deploy_debug_log.txt', `Command failed: ${command}\n`);
+            fs.appendFileSync(debugLog, `Command failed: ${command}\n`);
         } else {
-            fs.appendFileSync('D:/Projects/logs/webhook/deploy_debug_log.txt', `Command succeeded: ${command}\n`);
+            fs.appendFileSync(debugLog, `Command succeeded: ${command}\n`);
             runCommandsSequentially(commands, index + 1);
         }
     });
 }
 
 // Start the deployment process
-fs.appendFileSync('D:/Projects/logs/webhook/deploy_debug_log.txt', 'Running deployment commands...\n');
+fs.appendFileSync(debugLog, 'Running deployment commands...\n');
 runCommandsSequentially(commands);
