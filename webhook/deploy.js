@@ -7,7 +7,6 @@ const debugLogFile = 'D:\\Projects\\logs\\webhook\\deploy_debug_log.txt';
 
 const commands = [
   'git config --global --add safe.directory D:/Projects',
-  'cd D:\\Projects\\webhook',
   'git pull origin main',
   'npm install',
   'pm2 reload D:\\Projects\\ecosystem.config.js --env production'
@@ -22,7 +21,9 @@ function executeCommand(index) {
   const command = commands[index];
   fs.appendFileSync(debugLogFile, `Running command: ${command}\n`, 'utf8');
 
-  exec(command, (error, stdout, stderr) => {
+  const options = index > 0 ? { cwd: 'D:\\Projects\\webhook' } : {};
+
+  exec(command, options, (error, stdout, stderr) => {
     if (error) {
       fs.appendFileSync(errorLogFile, `Error: ${error}\n`, 'utf8');
       return;
